@@ -80,8 +80,8 @@ classdef TaskClass < handle
                     endswitch
             endswitch
             if ~isempty(obj.Parent.Pool.initialConfiguration), fprintf(fid,'%s;',obj.Parent.Pool.initialConfiguration); endif
-            fprintf(fid,'octave-cli --eval "diary %s; fid = fopen(''%s'',''w''); fprintf(fid,''%%s\\n'',gethostname); fclose(fid); try; %s catch E; save(''%s'',''E''); end; fid = fopen(''%s'',''a''); fprintf(fid,''%%s'',char(datetime())); fclose(fid); quit"',...
-                obj.DiaryFile,obj.ProcessFile,Command,obj.ErrorFile,obj.ProcessFile);
+            fprintf(fid,'%s --eval "diary %s; fid = fopen(''%s'',''w''); fprintf(fid,''%%s\\n'',gethostname); fclose(fid); try; %s catch E; save(''%s'',''E''); end; fid = fopen(''%s'',''a''); fprintf(fid,''%%s'',datetime().toString); fclose(fid); quit"',...
+                fullfile(OCTAVE_HOME, 'octave-cli'), obj.DiaryFile,obj.ProcessFile,Command,obj.ErrorFile,obj.ProcessFile);
             fclose(fid);
         endfunction
 
