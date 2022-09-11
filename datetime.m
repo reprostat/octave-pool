@@ -28,11 +28,14 @@ classdef datetime
       this.Format = format;
     endfunction
 
-    function disp(this)
+    function val = toString(this)
       if isempty(this), printf('\n'); return; endif
       str = datestr(this.getVec,this.Format);
-      str = strrep(str,'z', this.Zone);
-      printf('%s\n', str)
+      val = strrep(str,'z', this.Zone);
+    endfunction
+
+    function disp(this)
+      printf('%s\n', this.toString)
     endfunction
 
     function val = minus(this1,this2)
