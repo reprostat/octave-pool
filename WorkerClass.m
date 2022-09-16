@@ -12,10 +12,10 @@ classdef WorkerClass
     endmethods
 
     methods  (Static = true)
-      function this = empty()
-        this = WorkerClass();
-        this = this(false);
-      endfunction
+        function this = empty()
+            this = WorkerClass();
+            this = this(false);
+        endfunction
     endmethods
 endclassdef
 
