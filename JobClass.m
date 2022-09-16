@@ -21,7 +21,8 @@ classdef JobClass < handle
     endproperties
 
     methods
-        function this = JobClass(Pool)
+        function this = JobClass(Pool=[])
+            if isempty(Pool), return; endif
             this.Pool = Pool;
 
             this.ID = this.Pool.latestJobID+1;
@@ -84,5 +85,11 @@ classdef JobClass < handle
         endfunction
     endmethods
 
+        methods  (Static = true)
+        function this = empty()
+            this = JobClass();
+            this = this(false);
+        endfunction
+    endmethods
 endclassdef
 

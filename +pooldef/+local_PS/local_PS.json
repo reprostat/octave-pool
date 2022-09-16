@@ -1,0 +1,16 @@
+{
+    "Name": "local_PS",
+    "Type": "local",
+    "Shell": "ps",
+    "NumWorkers": "4",
+
+    "initialConfiguration": "",
+    "ResourceTemplate": "",
+    "SubmitArguments": "",
+    "JobStorageLocation": "D:\\Projects\\aaq_octave\\test",
+
+    "Functions": {
+        "SubmitStringFcn": "@(Job) sprintf( 'powershell -Command \"$P = Start-Process %s -PassThru; Write-Output $P.ID\"', Job.Tasks.ShellFile)",
+        "SchedulerIDFcn": "str2double"
+    }
+}
