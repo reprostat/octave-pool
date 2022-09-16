@@ -16,6 +16,7 @@ classdef TaskClass < handle
     endproperties
 
     properties (Access = private)
+        ScriptFile
         DiaryFile
         ProcessFile
         ErrorFile
@@ -31,19 +32,25 @@ classdef TaskClass < handle
     endproperties
 
     methods
-        function obj = TaskClass(Job,Name,varargin)
-            obj.CreateDateTime = datetime();
+        function this = TaskClass(Job=[], Name='', varargin)
+            if isempty(Job), return; endif
+            this.CreateDateTime = datetime();
 
-            obj.Parent = Job;
-            obj.Name = sprintf('Task%d_%s',obj.Parent.latestTaskID+1,Name);
-            obj.Folder = fullfile(obj.Parent.Folder,obj.Name);
-            mkdir(obj.Folder)
+            this.Parent = Job;
+            this.Name = sprintf('Task%d_%s',this.Parent.latestTaskID+1,Name);
+            this.Folder = fullfile(this.Parent.Folder,this.Name);
+            mkdir(this.Folder)
 
-            obj.ShellFile = fullfile(obj.Folder,'run.sh');
-            obj.LogFile = fullfile(obj.Folder,'log.txt');
-            obj.DiaryFile = fullfile(obj.Folder,'diary.txt');
-            obj.ProcessFile = fullfile(obj.Folder,'process');
-            obj.ErrorFile = fullfile(obj.Folder,'error.mat');
+            if ispc
+              this.ShellFile = fullfile(this.Folder,'run.bat');
+            else
+              this.ShellFile = fullfile(this.Folder,'run.sh');
+            endif
+            this.LogFile = fullfile(this.Folder,'log.txt');
+            this.ScriptFile = fullfile(this.Folder,'run.m');
+            this.DiaryFile = fullfile(this.Folder,'diary.txt');
+            this.ProcessFile = fullfile(this.Folder,'process');
+            this.ErrorFile = fullfile(this.Folder,'error.mat');
 
             % assemble command
             pathCommand = '';
@@ -52,75 +59,79 @@ classdef TaskClass < handle
             if nargin < 4
                 userVariable = [];
             else
-                obj.InputArguments = varargin{2};
-                varStr = sprintf('arg%d,',1:numel(obj.InputArguments));
+                this.InputArguments = varargin{2};
+                varStr = sprintf('arg%d,',1:numel(this.InputArguments));
                 varList = textscan(varStr,'%s','delimiter',',');
-                userVariable = cell2struct(obj.InputArguments,varList{1}',2);
+                userVariable = cell2struct(this.InputArguments,varList{1}',2);
                 Command = [Command, '('];
                 Command = [Command, varStr];
                 Command(end) = ')';
             endif
-            if ~isempty(obj.Parent.AdditionalPaths)
-                userVariable.reqpath = obj.Parent.AdditionalPaths;
-                pathCommand = sprintf('load(''%s'',''reqpath'');addpath(reqpath{:});',fullfile(obj.Folder,'data.mat'));
+            if ~isempty(this.Parent.AdditionalPaths)
+                userVariable.reqpath = this.Parent.AdditionalPaths;
+                pathCommand = sprintf('load(''%s'',''reqpath'');addpath(reqpath{:});',fullfile(this.Folder,'data.mat'));
             endif
             if ~isempty(userVariable)
-                save(fullfile(obj.Folder,'data.mat'),'-struct','userVariable');
-                varCommand = sprintf('load(''%s'',%s);',fullfile(obj.Folder,'data.mat'),['''' strrep(varStr(1:end-1),',',''',''') '''']);
+                save(fullfile(this.Folder,'data.mat'),'-struct','userVariable');
+                varCommand = sprintf('load(''%s'',%s);',fullfile(this.Folder,'data.mat'),['''' strrep(varStr(1:end-1),',',''',''') '''']);
             endif
             Command = [pathCommand, varCommand, Command ';'];
 
             % create script
-            fid = fopen(obj.ShellFile,'w');
-            switch obj.Parent.Pool.Type
+            fid = fopen(this.ShellFile,'w');
+            switch this.Parent.Pool.Type
                 case 'Slurm'
-                    switch obj.Parent.Pool.Shell
+                    switch this.Parent.Pool.Shell
                         case 'bash'
                             fprintf(fid,'#!/bin/bash\n');
                     endswitch
             endswitch
-            if ~isempty(obj.Parent.Pool.initialConfiguration), fprintf(fid,'%s;',obj.Parent.Pool.initialConfiguration); endif
-            fprintf(fid,'%s --eval "diary %s; fid = fopen(''%s'',''w''); fprintf(fid,''%%s\\n'',gethostname); fclose(fid); try; %s catch E; save(''%s'',''E''); end; fid = fopen(''%s'',''a''); fprintf(fid,''%%s'',datetime().toString); fclose(fid); quit"',...
-                fullfile(OCTAVE_HOME, 'octave-cli'), obj.DiaryFile,obj.ProcessFile,Command,obj.ErrorFile,obj.ProcessFile);
+            if ~isempty(this.Parent.Pool.initialConfiguration), fprintf(fid,'%s;',this.Parent.Pool.initialConfiguration); endif
+            fprintf(fid,'%s %s', fullfile(OCTAVE_HOME, 'bin', 'octave-cli'), this.ScriptFile);
             fclose(fid);
+            fid = fopen(this.ScriptFile,'w');
+            fprintf(fid,'diary %s;\nfid = fopen(''%s'',''w''); fprintf(fid,''%%d@%%s\\n'',getpid,gethostname); fclose(fid);\ntry\n    %s\ncatch E\n    save(''%s'',''E'');\nend_try_catch\nfid = fopen(''%s'',''a''); fprintf(fid,''%%s'',datetime().toString); fclose(fid);\ndiary off',...
+                this.DiaryFile,this.ProcessFile,Command,this.ErrorFile,this.ProcessFile);
+            fclose(fid);
+
         endfunction
 
-        function val = get.State(obj)
+        function val = get.State(this)
             val = 'unknown';
-            if exist(obj.ProcessFile,'file')
+            if exist(this.ProcessFile,'file')
                 val = 'running';
-                fid = fopen(obj.ProcessFile,'r');
+                fid = fopen(this.ProcessFile,'r');
                 lines = textscan(fid,'%s','delimiter','@'); lines = lines{1};
                 fclose(fid);
                 if numel(lines) >= 3, val = 'finished'; endif
             end
-            if exist(obj.ErrorFile,'file'), val = 'error'; endif
+            if exist(this.ErrorFile,'file'), val = 'error'; endif
         endfunction
 
-        function val = get.Worker(obj)
+        function val = get.Worker(this)
             val = WorkerClass.empty;
-            if exist(obj.ProcessFile,'file')
-                fid = fopen(obj.ProcessFile,'r');
+            if exist(this.ProcessFile,'file')
+                fid = fopen(this.ProcessFile,'r');
                 lines = textscan(fid,'%s','delimiter','@'); lines = lines{1};
                 fclose(fid);
                 if numel(lines) >= 2, val = WorkerClass(lines{2},str2double(lines{1})); endif
             endif
         endfunction
 
-        function val = get.FinishDateTime(obj)
+        function val = get.FinishDateTime(this)
             val = datetime.empty;
-            if any(strcmp({'finished','error'},obj.State))
-                fid = fopen(obj.ProcessFile,'r');
+            if any(strcmp({'finished','error'},this.State))
+                fid = fopen(this.ProcessFile,'r');
                 lines = textscan(fid,'%s','delimiter','@'); lines = lines{1};
                 fclose(fid);
-                if numel(lines) >= 3, val = datetime(lines{3},'Timezone','local'); endif
+                if numel(lines) >= 3, val = datetime(lines{3}); endif
             endif
         endfunction
 
-        function val = get.Diary(obj)
+        function val = get.Diary(this)
             val = '';
-            if exist(obj.DiaryFile,'file')
-                fid = fopen(obj.DiaryFile,'r');
+            if exist(this.DiaryFile,'file')
+                fid = fopen(this.DiaryFile,'r');
                 while ~feof(fid)
                    val = cat(2,val,fgets(fid));
                 endwhile
@@ -128,22 +139,28 @@ classdef TaskClass < handle
             endif
         endfunction
 
-        function val = get.ErrorMessage(obj)
+        function val = get.ErrorMessage(this)
             val = '';
-            if exist(obj.ErrorFile,'file')
-                load(obj.ErrorFile)
+            if exist(this.ErrorFile,'file')
+                load(this.ErrorFile)
                 val = E.message;
             endif
         endfunction
 
-        function val = get.Error(obj)
+        function val = get.Error(this)
             val = lasterror; val.stack = val.stack(false); val = val(false);
-            if exist(obj.ErrorFile,'file')
-                load(obj.ErrorFile)
+            if exist(this.ErrorFile,'file')
+                load(this.ErrorFile)
                 val = E;
             endif
         endfunction
 
     endmethods
 
+    methods  (Static = true)
+        function this = empty()
+            this = TaskClass();
+            this = this(false);
+        endfunction
+    endmethods
 endclassdef
