@@ -10,7 +10,7 @@
     "JobStorageLocation": "D:\\Projects\\aaq_octave\\test",
 
     "Functions": {
-        "SubmitStringFcn": "@(Job) sprintf( 'powershell -Command \"$P = Start-Process %s -PassThru; Write-Output $P.ID\"', Job.Tasks.ShellFile)",
+        "SubmitStringFcn": "@(Job) sprintf( 'powershell -Command \"$p = Start-Process %s -PassThru; Write-Output $p.ID\"', fileread(Job.Tasks.ShellFile))",
         "SchedulerIDFcn": "str2double"
     }
 }
