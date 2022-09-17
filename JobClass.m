@@ -42,6 +42,7 @@ classdef JobClass < handle
         function delete(this)
             if ~this.isvalid, return; endif
             if this.cancel
+                pause(1);
                 confirm_recursive_rmdir(0,'local')
                 rmdir(this.Folder,'s');
                 delete@handle(this)
