@@ -72,7 +72,7 @@ classdef TaskClass < handle
                 pathCommand = sprintf('load(''%s'',''reqpath'');addpath(reqpath{:});',fullfile(this.Folder,'data.mat'));
             endif
             if ~isempty(userVariable)
-                save(fullfile(this.Folder,'data.mat'),'-struct','userVariable');
+                save('-binary',fullfile(this.Folder,'data.mat'),'-struct','userVariable');
                 varCommand = sprintf('load(''%s'',%s);',fullfile(this.Folder,'data.mat'),['''' strrep(varStr(1:end-1),',',''',''') '''']);
             endif
             Command = [pathCommand, varCommand, Command ';'];
@@ -90,7 +90,7 @@ classdef TaskClass < handle
             fprintf(fid,'%s %s', fullfile(OCTAVE_HOME, 'bin', 'octave-cli'), this.ScriptFile);
             fclose(fid);
             fid = fopen(this.ScriptFile,'w');
-            fprintf(fid,'diary %s;\nfid = fopen(''%s'',''w''); fprintf(fid,''%%d@%%s\\n'',getpid,gethostname); fclose(fid);\ntry\n    %s\ncatch E\n    save(''%s'',''E'');\nend_try_catch\nfid = fopen(''%s'',''a''); fprintf(fid,''%%s'',datetime().toString); fclose(fid);\ndiary off',...
+            fprintf(fid,'diary %s;\nfid = fopen(''%s'',''w''); fprintf(fid,''%%d@%%s\\n'',getpid,gethostname); fclose(fid);\ntry\n    %s\ncatch E\n    save(''-binary'',''%s'',''E'');\nend_try_catch\nfid = fopen(''%s'',''a''); fprintf(fid,''%%s'',datetime().toString); fclose(fid);\ndiary off',...
                 this.DiaryFile,this.ProcessFile,Command,this.ErrorFile,this.ProcessFile);
             fclose(fid);
 
@@ -133,7 +133,8 @@ classdef TaskClass < handle
             if exist(this.DiaryFile,'file')
                 fid = fopen(this.DiaryFile,'r');
                 while ~feof(fid)
-                   val = cat(2,val,fgets(fid));
+                    line = fgets(fid);
+                    if ~isnumeric(line), val = cat(2,val,line); endif
                 endwhile
                 fclose(fid);
             endif
