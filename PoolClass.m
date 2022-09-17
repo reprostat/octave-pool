@@ -2,7 +2,6 @@ classdef PoolClass < handle
     properties
         Type
         JobStorageLocation
-        Jobs = JobClass.empty
 
         Host = gethostname
         Shell
@@ -25,6 +24,11 @@ classdef PoolClass < handle
     properties (Hidden, Access = protected)
         ResourceTemplate = ''
         SubmitArguments
+        _Jobs = JobClass.empty
+    endproperties
+
+    properties (Dependent)
+        Jobs
     endproperties
 
     methods
@@ -81,12 +85,12 @@ classdef PoolClass < handle
 
         function Job = addJob(this)
             Job = JobClass(this);
-            this.Jobs(end+1) = Job;
+            this._Jobs(end+1) = Job;
             this.latestJobID = this.latestJobID + 1;
         endfunction
 
         function val = get.Jobs(this)
-            val = this.Jobs(this.Jobs.isvalid);
+            val = this._Jobs(arrayfun(@(j) this._Jobs(j).isvalid, 1:numel(this._Jobs)));
         endfunction
 
     endmethods
