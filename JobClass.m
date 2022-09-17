@@ -61,8 +61,8 @@ classdef JobClass < handle
             s = ~s;
         endfunction
 
-        function addTask(this,Name,varargin)
-            Task = TaskClass(this,Name,varargin{:});
+        function addTask(this,Name,func,nOut,args)
+            Task = TaskClass(this,Name,func,nOut,args);
             this.Tasks(end+1) = Task;
             this.latestTaskID = this.latestTaskID + 1;
         endfunction
@@ -83,6 +83,13 @@ classdef JobClass < handle
                 val = this.Pool.getJobStateFcn(this.schedulerID);
             endif
             if any(strcmp({'finished','error'},val)), val = this.Tasks.State; endif
+        endfunction
+
+        function val = getOutput(this)
+            val = {};
+            if strcmp(this.State,'finished')
+                val = arrayfun(@(t) this.Tasks(t).getOutput(), 1:numel(this.Tasks), 'UniformOutput',false);
+            endif
         endfunction
     endmethods
 

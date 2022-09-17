@@ -19,6 +19,7 @@ classdef TaskClass < handle
         ScriptFile
         DiaryFile
         ProcessFile
+        OutFile = ''
         ErrorFile
     endproperties
 
@@ -32,7 +33,7 @@ classdef TaskClass < handle
     endproperties
 
     methods
-        function this = TaskClass(Job=[], Name='', varargin)
+        function this = TaskClass(Job=[], Name='', func=[], nOut=0, args={})
             if isempty(Job), return; endif
             this.CreateDateTime = datetime();
 
@@ -51,15 +52,16 @@ classdef TaskClass < handle
             this.DiaryFile = fullfile(this.Folder,'diary.txt');
             this.ProcessFile = fullfile(this.Folder,'process');
             this.ErrorFile = fullfile(this.Folder,'error.mat');
+            if nOut > 0, this.OutFile = fullfile(this.Folder,'out.mat'); endif
 
-            % assemble command
+            ## assemble command
             pathCommand = '';
             varCommand = '';
-            Command = func2str(varargin{1});
-            if nargin < 4
-                userVariable = [];
-            else
-                this.InputArguments = varargin{2};
+            Command = func2str(func);
+            userVariable = [];
+            ## - execute
+            if ~isempty(args)
+                this.InputArguments = args;
                 varStr = sprintf('arg%d,',1:numel(this.InputArguments));
                 varList = textscan(varStr,'%s','delimiter',',');
                 userVariable = cell2struct(this.InputArguments,varList{1}',2);
@@ -67,17 +69,24 @@ classdef TaskClass < handle
                 Command = [Command, varStr];
                 Command(end) = ')';
             endif
+            ## - output
+            if nOut > 0
+                outputStr = strjoin(arrayfun(@(o) sprintf('o%d',o), 1:nOut, 'UniformOutput', false),',');
+                Command = sprintf('[ %s ] = %s; save(''-binary'',''%s'', ''%s'')', outputStr, Command, this.OutFile, strrep(outputStr,',',''','''));
+            endif
+            ## - path
             if ~isempty(this.Parent.AdditionalPaths)
                 userVariable.reqpath = this.Parent.AdditionalPaths;
                 pathCommand = sprintf('load(''%s'',''reqpath'');addpath(reqpath{:});',fullfile(this.Folder,'data.mat'));
             endif
+            ## - input
             if ~isempty(userVariable)
                 save('-binary',fullfile(this.Folder,'data.mat'),'-struct','userVariable');
                 varCommand = sprintf('load(''%s'',%s);',fullfile(this.Folder,'data.mat'),['''' strrep(varStr(1:end-1),',',''',''') '''']);
             endif
             Command = [pathCommand, varCommand, Command ';'];
 
-            % create script
+            ## create script
             fid = fopen(this.ShellFile,'w');
             switch this.Parent.Pool.Type
                 case 'Slurm'
@@ -137,6 +146,13 @@ classdef TaskClass < handle
                     if ~isnumeric(line), val = cat(2,val,line); endif
                 endwhile
                 fclose(fid);
+            endif
+        endfunction
+
+        function val = getOutput(this)
+            val = {};
+            if strcmp(this.State,'finished') && ~isempty(this.OutFile)
+                val = struct2cell(load('-binary',this.OutFile));
             endif
         endfunction
 
