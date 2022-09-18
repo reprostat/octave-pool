@@ -36,7 +36,7 @@ classdef JobClass < handle
         endfunction
 
         function val = isvalid(this)
-            val = exist(this.Folder,'dir');
+            val = logical(exist(this.Folder,'dir'));
         endfunction
 
         function delete(this)
