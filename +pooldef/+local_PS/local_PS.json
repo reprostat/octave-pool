@@ -7,7 +7,7 @@
     "initialConfiguration": "",
     "ResourceTemplate": "",
     "SubmitArguments": "",
-    "JobStorageLocation": "D:\\Projects\\aaq_octave\\test",
+    "JobStorageLocation": "D:\\Projects\\test",
 
     "Functions": {
         "SubmitStringFcn": "@(Job) sprintf( 'powershell -Command \"$p = Start-Process %s -PassThru; Write-Output $p.ID\"', fileread(Job.Tasks.ShellFile))",

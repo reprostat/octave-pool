@@ -123,3 +123,27 @@ classdef PoolClass < handle
         endfunction
     endmethods
 end
+
+%!test
+%! addpath([fileparts(mfilename('fullpath')) pathsep fullfile(fileparts(mfilename('fullpath')),'extrafunctions')])
+%! Pool = PoolClass('+pooldef\+local_PS\local_PS.json');
+%! j = Pool.addJob();
+%! j.AdditionalPaths = {fileparts(mfilename('fullpath')),fullfile(fileparts(mfilename('fullpath')),'extrafunctions')};
+%! j.addTask('test',@eig,1,{rand(5000)});
+%! j.Submit();
+%! j.delete();
+%! assert(numel(Pool.Jobs),0)
+
+%!test
+%! addpath([fileparts(mfilename('fullpath')) pathsep fullfile(fileparts(mfilename('fullpath')),'extrafunctions')])
+%! Pool = PoolClass('+pooldef\+local_PS\local_PS.json');
+%! j = Pool.addJob();
+%! j.AdditionalPaths = {fileparts(mfilename('fullpath')),fullfile(fileparts(mfilename('fullpath')),'extrafunctions')};
+%! inp = rand(1000);
+%! j.addTask('test',@eig,1,{inp});
+%! j.Submit();
+%! while ~strcmp(j.State,'finished'), pause(1); endwhile
+%! out = j.getOutput();
+%! assert(out{1}{1}, eig(inp))
+%! j.delete()
+
