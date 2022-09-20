@@ -1,16 +1,16 @@
 {
-    "Name": "local_PS",
-    "Type": "local",
-    "Shell": "ps",
-    "NumWorkers": "4",
+    "name": "local_PS",
+    "type": "local",
+    "shell": "ps",
+    "numWorkers": "4",
 
     "initialConfiguration": "",
-    "ResourceTemplate": "",
-    "SubmitArguments": "",
-    "JobStorageLocation": "D:\\Projects\\test",
+    "resourceTemplate": "",
+    "submitArguments": "",
+    "jobStorageLocation": "",
 
-    "Functions": {
-        "SubmitStringFcn": "@(Job) sprintf( 'powershell -Command \"$p = Start-Process %s -PassThru; Write-Output $p.ID\"', fileread(Job.Tasks.ShellFile))",
-        "SchedulerIDFcn": "str2double"
+    "functions": {
+        "submitStringFcn": "@(job) sprintf( 'powershell -Command \"$p = Start-Process %s -PassThru; Write-Output $p.ID\"', fileread(job.tasks.shellFile))",
+        "schedulerIDFcn": "str2double"
     }
 }

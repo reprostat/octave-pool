@@ -1,17 +1,17 @@
 classdef datetime
     properties
-        Zone
-        Year
-        Month
-        Day
-        Hour
-        Minute
-        Second
-        Format
+        zone
+        year
+        month
+        day
+        hour
+        minute
+        second
+        format
     endproperties
 
     properties (Dependent)
-        SystemTimeZone
+        systemTimezone
     endproperties
 
     properties (Constant = true)
@@ -20,35 +20,40 @@ classdef datetime
 
     methods
         function this = datetime(t=clock,format='yyyy mmm dd HH:MM:SS z')
-            this.Zone = this.SystemTimeZone;
+            this.zone = this.systemTimezone;
 
             if ischar(t)
-                tmpFormat = format;
-                tmpFormat = strrep(tmpFormat,'yyyy','%d');
-                tmpFormat = strrep(tmpFormat,'mmm','%s');
-                tmpFormat = strrep(tmpFormat,'dd','%d');
-                tmpFormat = strrep(tmpFormat,'HH','%d');
-                tmpFormat = strrep(tmpFormat,'MM','%d');
-                tmpFormat = strrep(tmpFormat,'SS','%d');
-                tmpFormat = strrep(tmpFormat,'z','%s');
-                [this.Year, this.Month, this.Day, this.Hour, this.Minute, this.Second, junk] = sscanf(t,tmpFormat, 'C');
-                this.Month = find(strcmp(this.MONTHS3,this.Month));
+                tmpformat = format;
+                tmpformat = strrep(tmpformat,'yyyy','%d');
+                tmpformat = strrep(tmpformat,'mmm','%s');
+                tmpformat = strrep(tmpformat,'dd','%d');
+                tmpformat = strrep(tmpformat,'HH','%d');
+                tmpformat = strrep(tmpformat,'MM','%d');
+                tmpformat = strrep(tmpformat,'SS','%d');
+                tmpformat = strrep(tmpformat,'z','%s');
+                [this.year, this.month, this.day, this.hour, this.minute, this.second, junk] = sscanf(t,tmpformat, 'C');
+                this.month = find(strcmp(this.MONTHS3,this.month));
             else
-                this.Year = t(1);
-                this.Month = t(2);
-                this.Day = t(3);
-                this.Hour = t(4);
-                this.Minute = t(5);
-                this.Second = t(6);
+                this.year = t(1);
+                this.month = t(2);
+                this.day = t(3);
+                this.hour = t(4);
+                this.minute = t(5);
+                this.second = t(6);
             endif
 
-            this.Format = format;
+            this.format = format;
         endfunction
+
+        function val = toVec(this)
+            val = [this.year this.month this.day this.hour this.minute this.second];
+        endfunction
+
 
         function val = toString(this)
             if isempty(this), printf('\n'); return; endif
-            str = datestr(this.getVec,this.Format);
-            val = strrep(str,'z', this.Zone);
+            str = datestr(this.toVec,this.format);
+            val = strrep(str,'z', this.zone);
         endfunction
 
         function disp(this)
@@ -56,22 +61,16 @@ classdef datetime
         endfunction
 
         function val = minus(this1,this2)
-            et = localtime(etime(this1.getVec,this2.getVec));
+            et = localtime(etime(this1.toVec,this2.toVec));
             et.hour = et.hour-et.gmtoff/3600;
             et.mday = et.mday - 1;
             val = strftime('%ed %H:%M:%S',et);
         endfunction
 
-        function val = get.SystemTimeZone(this)
+        function val = get.systemTimezone(this)
             val = localtime(time).zone;
         endfunction
 
-    endmethods
-
-    methods (Access = private)
-        function val = getVec(this)
-            val = [this.Year this.Month this.Day this.Hour this.Minute this.Second];
-        endfunction
     endmethods
 
     methods  (Static = true)
@@ -81,3 +80,9 @@ classdef datetime
         endfunction
     endmethods
 endclassdef
+
+%!test
+%! d0 = datetime;
+%! d1 = d0.toVec;
+%! d1 = datetime(d1 + [0 0 1 1 1 1]);
+%! assert(d1-d0,' 1d 01:01:01');
