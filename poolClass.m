@@ -10,7 +10,7 @@ classdef poolClass < handle
         reqMemory = 1
         reqWalltime = 1
         initialConfiguration = ''
-    endproperties
+    end
 
     properties (Hidden)
         latestJobID = 0
@@ -19,17 +19,17 @@ classdef poolClass < handle
         getSchedulerIDFcn
         getJobStateFcn
         getJobDeleteStringFcn
-    endproperties
+    end
 
     properties (Hidden, Access = protected)
         resourceTemplate = ''
         submitArguments
         _jobs = jobClass.empty
-    endproperties
+    end
 
-    properties (Dependent)
+    properties (Depend)
         jobs
-    endproperties
+    end
 
     methods
         function this = poolClass(configJSON)
@@ -37,7 +37,7 @@ classdef poolClass < handle
 
             this.type = def.type;
             this.shell = def.shell;
-            if ~isempty(def.jobStorageLocation), this.jobStorageLocation = def.jobStorageLocation; endif
+            if ~isempty(def.jobStorageLocation), this.jobStorageLocation = def.jobStorageLocation; end
             this.numWorkers = def.numWorkers;
             this.resourceTemplate = def.resourceTemplate;
             this.submitArguments = def.submitArguments;
@@ -48,19 +48,19 @@ classdef poolClass < handle
                         this.(['get' upper(funcstr{1}(1)) funcstr{1}(2:end) 'Fcn']) = str2func(def.functions.([funcstr{1} 'Fcn']));
                     else
                         this.(['get' upper(funcstr{1}(1)) funcstr{1}(2:end) 'Fcn']) = str2func(sprintf('pooldef.%s.%s',def.name,funcstr{1}));
-                    endif
-                endfor
-            endif
+                    end
+                end
+            end
 
             switch this.type
                 case 'local'
                     datWT = NaN;
                     datMem = NaN;
-            endswitch
+            end
 
             this.reqWalltime = datWT;
             this.reqMemory = datMem;
-        endfunction
+        end
 
         function set.jobStorageLocation(this,value)
             this.jobStorageLocation = value;
@@ -68,32 +68,32 @@ classdef poolClass < handle
                 warning('jobStorageLocation is not specified. The current directory of %s will be used',pwd);
                 this.jobStorageLocation = pwd;
             elseif ~exist(this.jobStorageLocation,'dir'), mkdir(this.jobStorageLocation);
-            endif
-        endfunction
+            end
+        end
 
         function set.reqWalltime(this,value)
-            if isempty(value), return; endif
+            if isempty(value), return; end
             this.reqWalltime = value;
             this.updateSubmitArguments;
-        endfunction
+        end
 
         function set.reqMemory(this,value)
-            if isempty(value), return; endif
+            if isempty(value), return; end
             this.reqMemory = value;
             this.updateSubmitArguments;
-        endfunction
+        end
 
         function job = addJob(this)
             job = jobClass(this);
             this._jobs(end+1) = job;
             this.latestJobID = this.latestJobID + 1;
-        endfunction
+        end
 
         function val = get.jobs(this)
             val = this._jobs(arrayfun(@(j) this._jobs(j).isvalid, 1:numel(this._jobs)));
-        endfunction
+        end
 
-    endmethods
+    end
 
     methods (Hidden, Access = protected)
         function updateSubmitArguments(this)
@@ -119,9 +119,9 @@ classdef poolClass < handle
                     this.submitArguments = sprintf('-c %d -M %d -R "rusage[mem=%d:duration=%dh]"',walltime*60,memory*1000,memory*1000,walltime);
                 case 'Generic'
                     this.submitArguments = sprintf('-l s_cpu=%d:00:00 -l s_rss=%dG',walltime,memory);
-            endswitch
-        endfunction
-    endmethods
+            end
+        end
+    end
 end
 
 %!test
@@ -144,7 +144,7 @@ end
 %! inp = rand(1000);
 %! j.addTask('test',@eig,1,{inp});
 %! j.submit();
-%! while ~strcmp(j.state,'finished'), pause(1); endwhile
+%! while ~strcmp(j.state,'finished'), pause(1); end
 %! out = j.getOutput();
 %! assert(out{1}{1}, eig(inp))
 %! j.delete()

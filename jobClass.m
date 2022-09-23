@@ -4,25 +4,25 @@ classdef jobClass < handle
         name
         additionalPaths = {}
         tasks = taskClass.empty;
-    endproperties
+    end
 
-    properties (Dependent)
+    properties (Depend)
         state
-    endproperties
+    end
 
     properties (Hidden)
         pool
         folder
         latestTaskID = 0
-    endproperties
+    end
 
     properties (Hidden, Access = protected)
         schedulerID = NaN
-    endproperties
+    end
 
     methods
         function this = jobClass(pool=[])
-            if isempty(pool), return; endif
+            if isempty(pool), return; end
             this.pool = pool;
 
             this.id = this.pool.latestJobID+1;
@@ -33,14 +33,14 @@ classdef jobClass < handle
 %                 this.folder = [this.folder '+'];
 %             end
             mkdir(this.folder);
-        endfunction
+        end
 
         function val = isvalid(this)
             val = logical(exist(this.folder,'dir'));
-        endfunction
+        end
 
         function delete(this)
-            if ~this.isvalid, return; endif
+            if ~this.isvalid, return; end
             if this.cancel
                 pause(1);
                 confirm_recursive_rmdir(0,'local')
@@ -48,56 +48,56 @@ classdef jobClass < handle
                 delete@handle(this)
             else
                 warning('Job %s could not be killed!\nYou may need to kill manually by calling %s.',this.id,this.pool.getJobDeleteStringFcn(this.schedulerID));
-            endif
-        endfunction
+            end
+        end
 
         function s = cancel(this)
             s = false;
-            if ~any(strcmp({'unknown','finished','error'},this.state)), [s, w] = system(this.pool.getJobDeleteStringFcn(this.schedulerID)); endif
+            if ~any(strcmp({'unknown','finished','error'},this.state)), [s, w] = system(this.pool.getJobDeleteStringFcn(this.schedulerID)); end
             if s, warning(w);
 %             else
 %                 this.pool.Jobs([this.pool.Jobs.id]==this.id) = [];
-            endif
+            end
             s = ~s;
-        endfunction
+        end
 
         function addTask(this,name,func,nOut,args)
             task = taskClass(this,name,func,nOut,args);
             this.tasks(end+1) = task;
             this.latestTaskID = this.latestTaskID + 1;
-        endfunction
+        end
 
         function submit(this)
             [s, w] = system(this.pool.getSubmitStringFcn(this));
             for t = 1:numel(this.tasks)
                 this.tasks(t).startDateTime = datetime();
-            endfor
+            end
             if ~s
                 this.schedulerID = this.pool.getSchedulerIDFcn(w);
-            endif
-        endfunction
+            end
+        end
 
         function val = get.state(this)
             val = 'unknown';
             if ~isnan(this.schedulerID)
                 val = this.pool.getJobStateFcn(this.schedulerID);
-            endif
-            if any(strcmp({'finished','error'},val)), val = this.tasks.state; endif
-        endfunction
+            end
+            if any(strcmp({'finished','error'},val)), val = this.tasks.state; end
+        end
 
         function val = getOutput(this)
             val = {};
             if strcmp(this.state,'finished')
                 val = arrayfun(@(t) this.tasks(t).getOutput(), 1:numel(this.tasks), 'UniformOutput',false);
-            endif
-        endfunction
-    endmethods
+            end
+        end
+    end
 
         methods  (Static = true)
         function this = empty()
             this = jobClass();
             this = this(false);
-        endfunction
-    endmethods
-endclassdef
+        end
+    end
+end
 

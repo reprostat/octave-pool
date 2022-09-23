@@ -8,15 +8,15 @@ classdef datetime
         minute
         second
         format
-    endproperties
+    end
 
-    properties (Dependent)
+    properties (Depend)
         systemTimezone
-    endproperties
+    end
 
     properties (Constant = true)
         MONTHS3 = {'Jan' 'Feb' 'Mar' 'Apr' 'May' 'Jun' 'Jul' 'Aug' 'Sep' 'Oct' 'Nov' 'Dec'};
-    endproperties
+    end
 
     methods
         function this = datetime(t=clock,format='yyyy mmm dd HH:MM:SS z')
@@ -40,46 +40,46 @@ classdef datetime
                 this.hour = t(4);
                 this.minute = t(5);
                 this.second = t(6);
-            endif
+            end
 
             this.format = format;
-        endfunction
+        end
 
         function val = toVec(this)
             val = [this.year this.month this.day this.hour this.minute this.second];
-        endfunction
+        end
 
 
         function val = toString(this)
-            if isempty(this), printf('\n'); return; endif
+            if isempty(this), printf('\n'); return; end
             str = datestr(this.toVec,this.format);
             val = strrep(str,'z', this.zone);
-        endfunction
+        end
 
         function disp(this)
             printf('%s\n', this.toString)
-        endfunction
+        end
 
         function val = minus(this1,this2)
             et = localtime(etime(this1.toVec,this2.toVec));
             et.hour = et.hour-et.gmtoff/3600;
             et.mday = et.mday - 1;
             val = strftime('%ed %H:%M:%S',et);
-        endfunction
+        end
 
         function val = get.systemTimezone(this)
             val = localtime(time).zone;
-        endfunction
+        end
 
-    endmethods
+    end
 
     methods  (Static = true)
         function this = empty()
             this = datetime();
             this = this(false);
-        endfunction
-    endmethods
-endclassdef
+        end
+    end
+end
 
 %!test
 %! d0 = datetime;

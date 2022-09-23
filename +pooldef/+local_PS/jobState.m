@@ -7,7 +7,5 @@ function status = jobState(ID)
             status = 'error';
         otherwise
             status = 'finished';
-    endswitch
-endfunction
-
-
+    end
+end
