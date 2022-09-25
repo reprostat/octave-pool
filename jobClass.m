@@ -93,7 +93,7 @@ classdef jobClass < handle
         end
     end
 
-        methods  (Static = true)
+    methods  (Static = true)
         function this = empty()
             this = jobClass();
             this = this(false);
