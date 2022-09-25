@@ -134,6 +134,7 @@ end
 %! j.submit();
 %! j.delete();
 %! assert(numel(pool.jobs),0)
+%! rmpath([fileparts(mfilename('fullpath')) pathsep fullfile(fileparts(mfilename('fullpath')),'extrafunctions')])
 
 %!test
 %! addpath([fileparts(mfilename('fullpath')) pathsep fullfile(fileparts(mfilename('fullpath')),'extrafunctions')])
@@ -148,4 +149,4 @@ end
 %! out = j.getOutput();
 %! assert(out{1}{1}, eig(inp))
 %! j.delete()
-
+%! rmpath([fileparts(mfilename('fullpath')) pathsep fullfile(fileparts(mfilename('fullpath')),'extrafunctions')])
