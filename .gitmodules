@@ -1,0 +1,3 @@
+[submodule "external/fileio"]
+	path = external/fileio
+	url = https://github.com/reprostat/fileio
