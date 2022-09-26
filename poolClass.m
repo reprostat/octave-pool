@@ -125,23 +125,33 @@ classdef poolClass < handle
 end
 
 %!test
-%! addpath([fileparts(mfilename('fullpath')) pathsep fullfile(fileparts(mfilename('fullpath')),'extrafunctions')])
+%! pathToAdd = [...
+%!    fileparts(mfilename('fullpath')) pathsep ...
+%!    fullfile(fileparts(mfilename('fullpath')),'extrafunctions') pathsep ...
+%!    genpath(fullfile(fileparts(mfilename('fullpath')),'external')) ...
+%!    ];
+%! addpath(pathToAdd)
 %! pool = poolClass('+pooldef\+local_PS\local_PS.json');
 %! pool.jobStorageLocation = fullfile(fileparts(mfilename('fullpath')),'test');
 %! j = pool.addJob();
-%! j.additionalPaths = {fileparts(mfilename('fullpath')),fullfile(fileparts(mfilename('fullpath')),'extrafunctions')};
+%! j.additionalPaths = strsplit(pathToAdd,pathsep);
 %! j.addTask('test',@eig,1,{rand(5000)});
 %! j.submit();
 %! j.delete();
 %! assert(numel(pool.jobs),0)
-%! rmpath([fileparts(mfilename('fullpath')) pathsep fullfile(fileparts(mfilename('fullpath')),'extrafunctions')])
+%! rmpath(pathToAdd)
 
 %!test
-%! addpath([fileparts(mfilename('fullpath')) pathsep fullfile(fileparts(mfilename('fullpath')),'extrafunctions')])
+%! pathToAdd = [...
+%!    fileparts(mfilename('fullpath')) pathsep ...
+%!    fullfile(fileparts(mfilename('fullpath')),'extrafunctions') pathsep ...
+%!    genpath(fullfile(fileparts(mfilename('fullpath')),'external')) ...
+%!    ];
+%! addpath(pathToAdd)
 %! pool = poolClass('+pooldef\+local_PS\local_PS.json');
 %! pool.jobStorageLocation = fullfile(fileparts(mfilename('fullpath')),'test');
 %! j = pool.addJob();
-%! j.additionalPaths = {fileparts(mfilename('fullpath')),fullfile(fileparts(mfilename('fullpath')),'extrafunctions')};
+%! j.additionalPaths = strsplit(pathToAdd,pathsep);
 %! inp = rand(1000);
 %! j.addTask('test',@eig,1,{inp});
 %! j.submit();
@@ -149,4 +159,4 @@ end
 %! out = j.getOutput();
 %! assert(out{1}{1}, eig(inp))
 %! j.delete()
-%! rmpath([fileparts(mfilename('fullpath')) pathsep fullfile(fileparts(mfilename('fullpath')),'extrafunctions')])
+%! rmpath(pathToAdd)
