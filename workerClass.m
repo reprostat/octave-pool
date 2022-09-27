@@ -3,6 +3,14 @@ classdef workerClass < handle
         host
         processID
         logFile
+        logLevel = 0
+    end
+
+    properties (Access = private, Constant = true)
+        LOGLEVELS = containers.Map(...
+            {'info' 'warning' 'error'},...
+            [0 1 2] ...
+            );
     end
 
     methods
@@ -25,11 +33,16 @@ classdef workerClass < handle
             end
         end
 
-        function addLog(this,msg)
-            d = datetime;
-            fid = fopen(this.logFile,'a');
-            fprintf(fid, '[%s] - %s\n',d.toString,msg);
-            fclose(fid);
+        function addLog(this,varargin)
+            logType = regexp(varargin{1},'^.*(?=:)','match');
+            if this.LOGLEVELS.isKey(logType{1}) && (this.LOGLEVELS(logType{1}) >= this.logLevel)
+                d = datetime;
+                varargin = [{['[%s] - ' varargin{1}]} {d.toString} varargin(2:end)];
+                if ~strcmp(varargin{1}(end-1:end),'\n'), varargin{1} = [varargin{1} '\n']; end
+                fid = fopen(this.logFile,'a');
+                fprintf(fid, varargin{:});
+                fclose(fid);
+            end
         end
 
     end
