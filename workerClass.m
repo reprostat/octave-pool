@@ -20,10 +20,6 @@ classdef workerClass < handle
             this.logFile = logFile;
         end
 
-        function delete(this)
-            delete(this.logFile);
-        end
-
         function set.logFile(this,val)
             if ~strcmp(this.logFile,val)
                 if ~isempty(this.logFile), movefile(this.logFile,val);
