@@ -14,10 +14,18 @@ classdef workerClass < handle
     end
 
     methods
-        function this = workerClass(host='',pid=[],logFile='')
-            this.host = host;
-            this.processID = pid;
-            this.logFile = logFile;
+        function this = workerClass(varargin)
+            thisProc = strsplit(char(javaMethod('getName',javaMethod('getRuntimeMXBean','java.lang.management.ManagementFactory'))),'@');
+
+            argParse = inputParser;
+            argParse.addOptional('logFile','',@ischar);
+            argParse.addOptional('pid',str2double(thisProc{1}),@isnumeric);
+            argParse.addOptional('host',thisProc{2},@ischar);
+            argParse.parse(varargin{:});
+
+            this.host = argParse.Results.host;
+            this.processID = argParse.Results.pid;
+            this.logFile = argParse.Results.logFile;
         end
 
         function set.logFile(this,val)
@@ -32,8 +40,7 @@ classdef workerClass < handle
         function addLog(this,varargin)
             logType = regexp(varargin{1},'^.*(?=:)','match');
             if this.LOGLEVELS.isKey(logType{1}) && (this.LOGLEVELS(logType{1}) >= this.logLevel)
-                d = datetime;
-                varargin = [{['[%s] - ' varargin{1}]} {d.toString} varargin(2:end)];
+                varargin = [{['[%s] - ' varargin{1}]} {char(datetime())} varargin(2:end)];
                 if ~strcmp(varargin{1}(end-1:end),'\n'), varargin{1} = [varargin{1} '\n']; end
                 fid = fopen(this.logFile,'a');
                 fprintf(fid, varargin{:});

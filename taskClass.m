@@ -47,7 +47,7 @@ classdef taskClass < handle
             else
               this.shellFile = fullfile(this.folder,'run.sh');
             end
-            this._worker = workerClass('',[],fullfile(this.folder,'log.txt'));
+            this._worker = workerClass(fullfile(this.folder,'log.txt'));
             this.scriptFile = fullfile(this.folder,'run.m');
             this.diaryFile = fullfile(this.folder,'diary.txt');
             this.processFile = fullfile(this.folder,'process');
@@ -99,7 +99,7 @@ classdef taskClass < handle
             fprintf(fid,'%s %s', fullfile(OCTAVE_HOME, 'bin', 'octave-cli'), this.scriptFile);
             fclose(fid);
             fid = fopen(this.scriptFile,'w');
-            fprintf(fid,'diary %s;\nfid = fopen(''%s'',''w''); fprintf(fid,''%%d@%%s\\n'',getpid,gethostname); fclose(fid);\ntry\n    %s\ncatch E\n    save(''-binary'',''%s'',''E'');\nend_try_catch\nfid = fopen(''%s'',''a''); fprintf(fid,''%%s'',datetime().toString); fclose(fid);\ndiary off',...
+            fprintf(fid,'diary %s;\nfid = fopen(''%s'',''w''); fprintf(fid,''%%d@%%s\\n'',getpid,gethostname); fclose(fid);\ntry\n    %s\ncatch E\n    save(''-binary'',''%s'',''E'');\nend_try_catch\nfid = fopen(''%s'',''a''); fprintf(fid,''%%s'',char(datetime())); fclose(fid);\ndiary off',...
                 this.diaryFile,this.processFile,command,this.errorFile,this.processFile);
             fclose(fid);
 

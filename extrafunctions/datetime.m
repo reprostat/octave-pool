@@ -50,14 +50,14 @@ classdef datetime
         end
 
 
-        function val = toString(this)
+        function val = char(this)
             if isempty(this), printf('\n'); return; end
             str = datestr(this.toVec,this.format);
             val = strrep(str,'z', this.zone);
         end
 
         function disp(this)
-            printf('%s\n', this.toString)
+            printf('%s\n', this.char)
         end
 
         function val = minus(this1,this2)
