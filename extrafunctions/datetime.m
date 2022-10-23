@@ -31,7 +31,7 @@ classdef datetime
                 tmpformat = strrep(tmpformat,'MM','%d');
                 tmpformat = strrep(tmpformat,'SS','%d');
                 tmpformat = strrep(tmpformat,'z','%s');
-                [this.year, this.month, this.day, this.hour, this.minute, this.second, junk] = sscanf(t,tmpformat, 'C');
+                [this.year, this.month, this.day, this.hour, this.minute, this.second, ~] = sscanf(t,tmpformat, 'C');
                 this.month = find(strcmp(this.MONTHS3,this.month));
             else
                 this.year = t(1);
