@@ -53,7 +53,7 @@ classdef poolClass < handle
             end
 
             switch this.type
-                case 'local'
+                case {'local' 'powershell'}
                     datWT = NaN;
                     datMem = NaN;
             end

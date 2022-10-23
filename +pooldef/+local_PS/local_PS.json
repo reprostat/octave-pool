@@ -1,7 +1,7 @@
 {
     "name": "local_PS",
-    "type": "local",
-    "shell": "ps",
+    "type": "powershell",
+    "shell": "windows",
     "numWorkers": "4",
 
     "initialConfiguration": "",
