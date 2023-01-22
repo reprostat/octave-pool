@@ -3,7 +3,7 @@ classdef jobClass < handle
         id
         name
         additionalPaths = {}
-        tasks = taskClass.empty;
+        tasks = {};
     end
 
     properties (Depend)
@@ -22,7 +22,6 @@ classdef jobClass < handle
 
     methods
         function this = jobClass(pool=[])
-            if isempty(pool), return; end
             this.pool = pool;
 
             this.id = this.pool.latestJobID+1;
@@ -63,14 +62,14 @@ classdef jobClass < handle
 
         function addTask(this,name,func,nOut,args)
             task = taskClass(this,name,func,nOut,args);
-            this.tasks(end+1) = task;
+            this.tasks{end+1} = task;
             this.latestTaskID = this.latestTaskID + 1;
         end
 
         function submit(this)
             [s, w] = system(this.pool.getSubmitStringFcn(this));
             for t = 1:numel(this.tasks)
-                this.tasks(t).startDateTime = datetime();
+                this.tasks{t}.startDateTime = datetime();
             end
             if ~s
                 this.schedulerID = this.pool.getSchedulerIDFcn(w);
@@ -78,26 +77,26 @@ classdef jobClass < handle
         end
 
         function val = get.state(this)
-            val = 'unknown';
             if ~isnan(this.schedulerID)
                 val = this.pool.getJobStateFcn(this.schedulerID);
             end
-            if any(strcmp({'finished','error'},val)), val = this.tasks.state; end
+            taskStates = cellfun(@(t) t.state, this.tasks, 'UniformOutput',false);
+            if any(strcmp({'finished','error'},val))  % double check with tasks
+                if any(strcmp(taskStates,'error')), val = 'error';
+                else, val = 'finished';
+                end
+            elseif any(strcmp(taskStates,'running')), val = 'running'; % last resort
+            else, val = 'unknown';
+            end
         end
 
         function val = getOutput(this)
             val = {};
             if strcmp(this.state,'finished')
-                val = arrayfun(@(t) this.tasks(t).getOutput(), 1:numel(this.tasks), 'UniformOutput',false);
+                val = cellfun(@(t) t.getOutput(), this.tasks, 'UniformOutput',false);
             end
         end
     end
 
-    methods  (Static = true)
-        function this = empty()
-            this = jobClass();
-            this = this(false);
-        end
-    end
 end
 

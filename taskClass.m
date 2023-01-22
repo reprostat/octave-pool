@@ -34,7 +34,6 @@ classdef taskClass < handle
 
     methods
         function this = taskClass(job=[], name='', func=[], nOut=0, args={})
-            if isempty(job), return; end
             this.createDateTime = datetime();
 
             this.parent = job;
@@ -177,10 +176,4 @@ classdef taskClass < handle
 
     end
 
-    methods  (Static = true)
-        function this = empty()
-            this = taskClass();
-            this = this(false);
-        end
-    end
 end

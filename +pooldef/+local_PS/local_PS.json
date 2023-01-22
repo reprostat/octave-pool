@@ -10,7 +10,7 @@
     "jobStorageLocation": "",
 
     "functions": {
-        "submitStringFcn": "@(job) sprintf( 'powershell -Command \"$p = Start-Process %s -PassThru; Write-Output $p.ID\"', fileread(job.tasks.shellFile))",
+        "submitStringFcn": "@(job) sprintf( 'powershell -Command \"$p = Start-Process %s -PassThru; Write-Output $p.ID\"', fileread(job.tasks{1}.shellFile))",
         "schedulerIDFcn": "str2double"
     }
 }

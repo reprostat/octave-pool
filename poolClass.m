@@ -24,7 +24,7 @@ classdef poolClass < handle
     properties (Hidden, Access = protected)
         resourceTemplate = ''
         submitArguments
-        _jobs = jobClass.empty
+        _jobs = {}
     end
 
     properties (Depend)
@@ -85,12 +85,12 @@ classdef poolClass < handle
 
         function job = addJob(this)
             job = jobClass(this);
-            this._jobs(end+1) = job;
+            this._jobs{end+1} = job;
             this.latestJobID = this.latestJobID + 1;
         end
 
         function val = get.jobs(this)
-            val = this._jobs(arrayfun(@(j) this._jobs(j).isvalid, 1:numel(this._jobs)));
+            val = this._jobs(cellfun(@(j) j.isvalid, this._jobs));
         end
 
     end

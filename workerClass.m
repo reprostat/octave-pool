@@ -50,11 +50,5 @@ classdef workerClass < handle
 
     end
 
-    methods  (Static = true)
-        function this = empty()
-            this = workerClass();
-            this = this(false);
-        end
-    end
 end
 
