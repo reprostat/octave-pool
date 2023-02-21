@@ -37,9 +37,10 @@ classdef workerClass < handle
             end
         end
 
-        function addLog(this,varargin)
+        function toLog = addLog(this,varargin)
             logType = regexp(varargin{1},'^.*(?=:)','match');
-            if this.LOGLEVELS.isKey(logType{1}) && (this.LOGLEVELS(logType{1}) >= this.logLevel)
+            toLog = this.LOGLEVELS.isKey(logType{1}) && (this.LOGLEVELS(logType{1}) >= this.logLevel);
+            if toLog
                 varargin = [{['[%s] - ' varargin{1}]} {char(datetime())} varargin(2:end)];
                 if ~strcmp(varargin{1}(end-1:end),'\n'), varargin{1} = [varargin{1} '\n']; end
                 fid = fopen(this.logFile,'a');
