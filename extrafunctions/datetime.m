@@ -22,17 +22,21 @@ classdef datetime
         function this = datetime(t=clock,format='yyyy mmm dd HH:MM:SS z')
             this.zone = this.systemTimezone;
 
+            assert(~any(format=='$'), 'Illegal character ($) in format');
+
             if ischar(t)
                 tmpformat = format;
-                tmpformat = strrep(tmpformat,'yyyy','%d');
-                tmpformat = strrep(tmpformat,'mmm','%s');
-                tmpformat = strrep(tmpformat,'dd','%d');
-                tmpformat = strrep(tmpformat,'HH','%d');
-                tmpformat = strrep(tmpformat,'MM','%d');
-                tmpformat = strrep(tmpformat,'SS','%d');
-                tmpformat = strrep(tmpformat,'z','%s');
+                tmpformat = strrep(tmpformat,'yyyy','$%4d$');
+                tmpformat = strrep(tmpformat,'mmm','$%s$');
+                tmpformat = strrep(tmpformat,'mm','$%2d$');
+                tmpformat = strrep(tmpformat,'dd','$%2d$');
+                tmpformat = strrep(tmpformat,'HH','$%2d$');
+                tmpformat = strrep(tmpformat,'MM','$%2d$');
+                tmpformat = strrep(tmpformat,'SS','$%2d$');
+                tmpformat = strrep(tmpformat,'z','$%s$');
+                tmpformat = strrep(tmpformat,'$','');
                 [this.year, this.month, this.day, this.hour, this.minute, this.second, ~] = sscanf(t,tmpformat, 'C');
-                this.month = find(strcmp(this.MONTHS3,this.month));
+                if ischar(this.month), this.month = find(strcmp(this.MONTHS3,this.month)); end
             else
                 this.year = t(1);
                 this.month = t(2);
@@ -60,11 +64,23 @@ classdef datetime
             printf('%s\n', this.char)
         end
 
-        function val = minus(this1,this2)
+        function val = minus(this1,this2) % CAVE: cannot detect difference > 30d 23:59:59 days
             et = localtime(etime(this1.toVec,this2.toVec));
             et.hour = et.hour-et.gmtoff/3600;
             et.mday = et.mday - 1;
             val = strftime('%ed %H:%M:%S',et);
+        end
+
+        function val = eq(this1,this2)
+            val = etime(this1.toVec,this2.toVec) == 0;
+        end
+
+        function val = gt(this1,this2)
+            val = etime(this1.toVec,this2.toVec) > 0;
+        end
+
+        function val = lt(this1,this2)
+            val = etime(this1.toVec,this2.toVec) < 0;
         end
 
         function val = get.systemTimezone(this)
