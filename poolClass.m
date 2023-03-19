@@ -14,6 +14,7 @@ classdef poolClass < handle
 
     properties (Hidden)
         latestJobID = 0
+        jobDirNameFormat = 'Job%d'
 
         getSubmitStringFcn
         getSchedulerIDFcn
@@ -68,6 +69,10 @@ classdef poolClass < handle
                 warning('jobStorageLocation is not specified. The current directory of %s will be used',pwd);
                 this.jobStorageLocation = pwd;
             elseif ~exist(this.jobStorageLocation,'dir'), mkdir(this.jobStorageLocation);
+            else
+                while exist(fullfile(this.jobStorageLocation,sprintf(this.jobDirNameFormat,this.latestJobID+1)),'dir')
+                    this.latestJobID = this.latestJobID + 1;
+                end
             end
         end
 
@@ -150,11 +155,8 @@ end
 %! addpath(pathToAdd)
 %! pool = poolClass('+pooldef\+local_PS\local_PS.json');
 %! pool.jobStorageLocation = fullfile(fileparts(mfilename('fullpath')),'test');
-%! j = pool.addJob();
-%! j.additionalPaths = strsplit(pathToAdd,pathsep);
 %! inp = rand(1000);
-%! j.addTask('test',@eig,1,{inp});
-%! j.submit();
+%! j = batch(pool,@eig,1,{inp},'name','test','additionalPaths',strsplit(pathToAdd,pathsep));
 %! while ~strcmp(j.state,'finished'), pause(1); end
 %! out = j.getOutput();
 %! assert(out{1}{1}, eig(inp))

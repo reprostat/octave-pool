@@ -25,7 +25,7 @@ classdef jobClass < handle
             this.pool = pool;
 
             this.id = this.pool.latestJobID+1;
-            this.name = sprintf('Job%d',this.id);
+            this.name = sprintf(this.pool.jobDirNameFormat,this.id);
 
             this.folder = fullfile(this.pool.jobStorageLocation,this.name);
 %             while exist(this.folder,'dir')
