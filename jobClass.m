@@ -80,9 +80,11 @@ classdef jobClass < handle
             if ~isnan(this.schedulerID)
                 val = this.pool.getJobStateFcn(this.schedulerID);
             end
+
+            % double check with tasks
             taskStates = cellfun(@(t) t.state, this.tasks, 'UniformOutput',false);
-            if any(strcmp({'finished','error'},val))  % double check with tasks
-                if any(strcmp(taskStates,'error')), val = 'error';
+            if any(strcmp({'finished','error'},val))
+                if any(~strcmp(taskStates,'finished')), val = 'error'; % if the tasks has not finished -> error
                 else, val = 'finished';
                 end
             elseif any(strcmp(taskStates,'running')), val = 'running'; % last resort

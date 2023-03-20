@@ -157,7 +157,8 @@ end
 %! pool.jobStorageLocation = fullfile(fileparts(mfilename('fullpath')),'test');
 %! inp = rand(1000);
 %! j = batch(pool,@eig,1,{inp},'name','test','additionalPaths',strsplit(pathToAdd,pathsep));
-%! while ~strcmp(j.state,'finished'), pause(1); end
+%! while ~any(strcmp({'finished' 'error'}, j.state)), pause(1); end
+%! assert(j.state, 'finished')
 %! out = j.getOutput();
 %! assert(out{1}{1}, eig(inp))
 %! j.delete()
