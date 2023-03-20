@@ -98,6 +98,21 @@ classdef poolClass < handle
             val = this._jobs(cellfun(@(j) j.isvalid, this._jobs));
         end
 
+        function val = getJobState(this,state)
+            val = containers.Map('KeyType','char', 'ValueType','double');
+            jobStates = cellfun(@(j) j.state, this.jobs, 'UniformOutput',false);
+            for s = unique(jobStates)
+                if ~val.isKey(s{1}), val(s{1}) = 0; end
+                val(s{1}) = val(s{1}) + 1;
+            end
+
+            if nargin > 1
+                if val.isKey(state), val = val(state);
+                else, val = 0;
+                end
+            end
+        end
+
     end
 
     methods (Hidden, Access = protected)
@@ -142,6 +157,7 @@ end
 %! j.additionalPaths = strsplit(pathToAdd,pathsep);
 %! j.addTask('test',@eig,1,{rand(5000)});
 %! j.submit();
+%! assert(pool.getJobState('running'), 1)
 %! j.delete();
 %! assert(numel(pool.jobs),0)
 %! rmpath(pathToAdd)
