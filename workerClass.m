@@ -3,7 +3,7 @@ classdef workerClass < handle
         host
         processID
         logFile
-        logLevel = 0
+        logLevel
     end
 
     properties (Access = private, Constant = true)
@@ -17,8 +17,13 @@ classdef workerClass < handle
         function this = workerClass(varargin)
             thisProc = strsplit(char(javaMethod('getName',javaMethod('getRuntimeMXBean','java.lang.management.ManagementFactory'))),'@');
 
+            if isstruct(varargin{1}) % load from struct
+                varargin = {varargin{1}.logFile,varargin{1}.logLevel};
+            end
+
             argParse = inputParser;
             argParse.addOptional('logFile','',@ischar);
+            argParse.addOptional('logLevel',0,@isnumeric);
             argParse.addOptional('pid',str2double(thisProc{1}),@isnumeric);
             argParse.addOptional('host',thisProc{2},@ischar);
             argParse.parse(varargin{:});
@@ -26,6 +31,11 @@ classdef workerClass < handle
             this.host = argParse.Results.host;
             this.processID = argParse.Results.pid;
             this.logFile = argParse.Results.logFile;
+            this.logLevel = argParse.Results.logLevel;
+        end
+
+        function val = struct(this)
+            val = struct('logFile',this.logFile,'logLevel',this.logLevel);
         end
 
         function set.logFile(this,val)
