@@ -60,6 +60,9 @@ classdef taskClass < handle
             userVariable = [];
             ## - execute
             if ~isempty(args)
+                ## - parse special cases
+                args{cellfun(@(a) ischar(a) & strcmp(a,'$thisworker'), args)} = struct(this._worker);
+
                 this.inputArguments = args;
                 varStr = sprintf('arg%d,',1:numel(this.inputArguments));
                 varList = textscan(varStr,'%s','delimiter',',');
