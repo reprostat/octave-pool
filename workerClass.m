@@ -8,8 +8,8 @@ classdef workerClass < handle
 
     properties (Access = private, Constant = true)
         LOGLEVELS = containers.Map(...
-            {'info' 'warning' 'error'},...
-            [0 1 2] ...
+            {'info' 'warning' 'error' 'always'},...
+            [0 1 2 Inf] ...
             );
     end
 
@@ -48,16 +48,16 @@ classdef workerClass < handle
         end
 
         function toLog = addLog(this,varargin)
-            logType = regexp(varargin{1},'^.*(?=:)','match');
-            toLog = this.LOGLEVELS.isKey(logType{1}) && (this.LOGLEVELS(logType{1}) >= this.logLevel);
+            logMeta = strsplit(varargin{1},':');
+            [logType, logSrc] = deal(logMeta{1:end-1});
 
-            % Debug
-            fprintf('Loglevel %s is defined? - %d\n',logType{1},this.LOGLEVELS.isKey(logType{1}));
-            if this.LOGLEVELS.isKey(logType{1})
-                fprintf('Level of log - %d; Loglevel - %d\n',this.LOGLEVELS(logType{1}),this.logLevel);
+            % Debug - report undefined/mistyped log type
+            if ~this.LOGLEVELS.isKey(logType)
+                varargin{1} = strrep(varargin{1},logType,[logType '(undefined)']);
+                logType = 'always';
             end
-            fprintf('To Log - %d\n',toLog);
 
+            toLog = this.LOGLEVELS(logType) >= this.logLevel;
             if toLog
                 varargin = [{['[%s] - ' varargin{1}]} {char(datetime())} varargin(2:end)];
                 if ~strcmp(varargin{1}(end-1:end),'\n'), varargin{1} = [varargin{1} '\n']; end
