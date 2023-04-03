@@ -50,6 +50,14 @@ classdef workerClass < handle
         function toLog = addLog(this,varargin)
             logType = regexp(varargin{1},'^.*(?=:)','match');
             toLog = this.LOGLEVELS.isKey(logType{1}) && (this.LOGLEVELS(logType{1}) >= this.logLevel);
+
+            % Debug
+            fprintf('Loglevel %s is defined? - %d\n',logType{1},this.LOGLEVELS.isKey(logType{1}));
+            if this.LOGLEVELS.isKey(logType{1})
+                fprintf('Level of log - %d; Loglevel - %d\n',this.LOGLEVELS(logType{1}),this.logLevel);
+            end
+            fprintf('To Log - %d\n',toLog);
+
             if toLog
                 varargin = [{['[%s] - ' varargin{1}]} {char(datetime())} varargin(2:end)];
                 if ~strcmp(varargin{1}(end-1:end),'\n'), varargin{1} = [varargin{1} '\n']; end
