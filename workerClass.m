@@ -49,7 +49,8 @@ classdef workerClass < handle
 
         function toLog = addLog(this,varargin)
             logMeta = strsplit(varargin{1},':');
-            [logType, logSrc] = deal(logMeta{1:end-1});
+            logType = logMeta{1};
+            % if numel(logMeta) >= 3, logSrc = logMeta{2}; end
 
             % Debug - report undefined/mistyped log type
             if ~this.LOGLEVELS.isKey(logType)
