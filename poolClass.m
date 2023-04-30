@@ -22,9 +22,12 @@ classdef poolClass < handle
         getJobDeleteStringFcn
     end
 
-    properties (Hidden, Access = protected)
+    properties (Hidden)
         resourceTemplate = ''
         submitArguments
+    end
+
+    properties (Hidden, Access = protected)
         _jobs = {}
     end
 
@@ -39,7 +42,7 @@ classdef poolClass < handle
             this.type = def.type;
             this.shell = def.shell;
             if ~isempty(def.jobStorageLocation), this.jobStorageLocation = def.jobStorageLocation; end
-            this.numWorkers = def.numWorkers;
+            this.numWorkers = str2double(def.numWorkers);
             this.resourceTemplate = def.resourceTemplate;
             this.submitArguments = def.submitArguments;
 
@@ -54,6 +57,9 @@ classdef poolClass < handle
             end
 
             switch this.type
+                case {'Slurm'}
+                    datWT = str2double(regexp(this.resourceTemplate,'(?<=--time=)[0-9]*','match','once'))/60;
+                    datMem = str2double(regexp(this.resourceTemplate,'(?<=--mem=)[0-9]*','match','once'));
                 case {'local' 'powershell'}
                     datWT = NaN;
                     datMem = NaN;
@@ -79,13 +85,13 @@ classdef poolClass < handle
         function set.reqWalltime(this,value)
             if isempty(value), return; end
             this.reqWalltime = value;
-            this.updateSubmitArguments;
+            this.updateResourceTemplate;
         end
 
         function set.reqMemory(this,value)
             if isempty(value), return; end
             this.reqMemory = value;
-            this.updateSubmitArguments;
+            this.updateResourceTemplate;
         end
 
         function job = addJob(this)
@@ -116,7 +122,7 @@ classdef poolClass < handle
     end
 
     methods (Hidden, Access = protected)
-        function updateSubmitArguments(this)
+        function updateResourceTemplate(this)
             memory = this.reqMemory;
             walltime = this.reqWalltime;
 
@@ -127,18 +133,18 @@ classdef poolClass < handle
                     else % non-round --> MB
                         memory = sprintf('%dM',memory*1000);
                     end
-                    this.submitArguments = sprintf('--mem=%s -t %d ',memory,walltime*60);
+                    this.resourceTemplate = sprintf('--mem=%s --time=%d',memory,walltime*60);
                 case 'Torque'
                     if round(memory) == memory % round
                         memory = sprintf('%dGB',memory);
                     else % non-round --> MB
                         memory = sprintf('%dMB',memory*1000);
                     end
-                    this.submitArguments = sprintf('-q compute -l mem=%s -l walltime=%d',memory,walltime*3600);
+                    this.resourceTemplate = sprintf('-q compute -l mem=%s -l walltime=%d',memory,walltime*3600);
                 case 'LSF'
-                    this.submitArguments = sprintf('-c %d -M %d -R "rusage[mem=%d:duration=%dh]"',walltime*60,memory*1000,memory*1000,walltime);
-                case 'Generic'
-                    this.submitArguments = sprintf('-l s_cpu=%d:00:00 -l s_rss=%dG',walltime,memory);
+                    this.resourceTemplate = sprintf('-c %d -M %d -R "rusage[mem=%d:duration=%dh]"',walltime*60,memory*1000,memory*1000,walltime);
+                case 'Generic' % SoG/OSG
+                    this.resourceTemplate = sprintf('-l s_cpu=%d:00:00 -l s_rss=%dG',walltime,memory);
             end
         end
     end
@@ -151,7 +157,9 @@ end
 %!    genpath(fullfile(fileparts(mfilename('fullpath')),'external')) ...
 %!    ];
 %! addpath(pathToAdd)
-%! pool = poolClass('+pooldef\+local_PS\local_PS.json');
+%! if ispc(), pool = poolClass('+pooldef\+local_PS\local_PS.json');
+%! else, pool = poolClass('+pooldef\+slurm\slurm.json');
+%! end
 %! pool.jobStorageLocation = fullfile(fileparts(mfilename('fullpath')),'test');
 %! j = pool.addJob();
 %! j.additionalPaths = strsplit(pathToAdd,pathsep);
@@ -169,7 +177,9 @@ end
 %!    genpath(fullfile(fileparts(mfilename('fullpath')),'external')) ...
 %!    ];
 %! addpath(pathToAdd)
-%! pool = poolClass('+pooldef\+local_PS\local_PS.json');
+%! if ispc(), pool = poolClass('+pooldef\+local_PS\local_PS.json');
+%! else, pool = poolClass('+pooldef\+slurm\slurm.json');
+%! end
 %! pool.jobStorageLocation = fullfile(fileparts(mfilename('fullpath')),'test');
 %! inp = rand(1000);
 %! j = batch(pool,@eig,1,{inp},'name','test','additionalPaths',strsplit(pathToAdd,pathsep));

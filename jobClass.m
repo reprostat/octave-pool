@@ -67,7 +67,16 @@ classdef jobClass < handle
         end
 
         function submit(this)
-            [s, w] = system(this.pool.getSubmitStringFcn(this));
+            cmd = this.pool.getSubmitStringFcn(this);
+
+            % - parse special cases
+            if contains(cmd,'\$thispool','regularExpression',true)
+                for poolVars = regexp(cmd,'(?<=\$thispool\.)[^ ]*','match')
+                    cmd = strrep(cmd,['$thispool.' poolVars{1}],this.pool.(poolVars{1}));
+                end
+            end
+            cmd
+            [s, w] = system(cmd);
             for t = 1:numel(this.tasks)
                 this.tasks{t}.startDateTime = datetime();
             end

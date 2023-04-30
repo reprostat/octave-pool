@@ -1,0 +1,16 @@
+{
+    "name": "slurm",
+    "type": "Slurm",
+    "shell": "bash",
+    "numWorkers": "4",
+
+    "initialConfiguration": "",
+    "resourceTemplate": "--mem=2G --time=60",
+    "submitArguments": "",
+    "jobStorageLocation": "",
+
+    "functions": {
+        "schedulerIDFcn": "@(stdOut) str2double(regexp(stdOut, '[0-9]*', 'match', 'once' ))",
+        "jobDeleteStringFcn": "@(ID) sprintf('scancel %d',ID)"
+    }
+}
