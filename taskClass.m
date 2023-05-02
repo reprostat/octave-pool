@@ -1,8 +1,10 @@
 classdef taskClass < handle
+% Class to represent a task as part of a job. It is usually not created by directly calling its constructor but rather via jobClass/addTask.
+
     properties
         name
-        createDateTime = datetime.empty
-        startDateTime = datetime.empty
+        createDateTime
+        startDateTime
 
         parent
 
