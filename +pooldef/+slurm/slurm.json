@@ -4,10 +4,11 @@
     "shell": "bash",
     "numWorkers": "4",
 
-    "initialConfiguration": "",
+    "jobStorageLocation": "",
     "resourceTemplate": "--mem=2G --time=60",
     "submitArguments": "",
-    "jobStorageLocation": "",
+    "initialConfiguration": "",
+    "octaveExecutable": "octave",
 
     "functions": {
         "schedulerIDFcn": "@(stdOut) str2double(regexp(stdOut, '[0-9]*', 'match', 'once' ))",

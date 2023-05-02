@@ -10,6 +10,7 @@ classdef taskClass < handle
     end
 
     properties (Hidden)
+        pid
         folder
         shellFile
         logFile % system StdOut
@@ -101,13 +102,12 @@ classdef taskClass < handle
                     end
             end
             if ~isempty(this.parent.pool.initialConfiguration), fprintf(fid,'%s;',this.parent.pool.initialConfiguration); end
-            fprintf(fid,'%s %s', fullfile(OCTAVE_HOME, 'bin', 'octave'), this.scriptFile);
+            fprintf(fid,'%s %s', fullfile(OCTAVE_HOME, 'bin', this.parent.pool.octaveExecutable), this.scriptFile);
             fclose(fid);
             fid = fopen(this.scriptFile,'w');
             fprintf(fid,'diary %s;\nfid = fopen(''%s'',''w''); fprintf(fid,''%%d@%%s\\n'',getpid,gethostname); fclose(fid);\ntry\n    %s\ncatch E\n    save(''-binary'',''%s'',''E'');\nend\nfid = fopen(''%s'',''a''); fprintf(fid,''%%s'',char(datetime())); fclose(fid);\ndiary off',...
                 this.diaryFile,this.processFile,command,this.errorFile,this.processFile);
             fclose(fid);
-
         end
 
         function val = get.state(this)

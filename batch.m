@@ -1,4 +1,23 @@
 function j = batch(pool,func,nOut,argIn,varargin)
+% Convenience wrapper to create and submit a job and returns a handle to it.
+%
+% FORMAT j = batch(pool,func,nOut,argIn)
+%
+% INPUT
+% See also jobClass/addTask
+%   pool  - pool object
+%   func  - function string or handle
+%   nOout - number of outputs
+%   argIn - cell of input arguments. '$thisworker' can be used to pass task.worker (for logging).
+%
+% FORMAT j = batch(...,Name,Value)
+%   'name'              - name of the job as it appears on the scheduler (default = '')
+%   'autoAddClientPath' - automatically add current Ocatave path to the job (default = false)
+%   'additionalPaths'   - cell of paths to be added to the job (default = {})
+%
+%
+% SEE ALSO
+% jobClass
 
     % Parse input
     if ischar(func), func = str2func(func); end

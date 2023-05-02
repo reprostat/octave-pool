@@ -1,7 +1,43 @@
 classdef jobClass < handle
-    properties
+% Class to represent a job submitted to the pool. It is usually not created by directly calling its constructor but rather via poolClass/addJob and batch.
+%
+% PROPERTIES
+%   id              - read-only, job number in the pool to determine job name.
+%   name            - read-only, job name in the pool to deternmine the job storage folder in pool.jobStorageLocation.
+%   additionalPaths - cell of paths to be added to the job (default = {})
+%   tasks           - list of tasks (usually 1)
+%   state           - job state as return by the scheduler
+%
+% METHODS
+%   FORMAT addTask(name,func,nOut,args)
+%   Create a task (with folder and files) and add it to the job
+%   INPUT
+%     name - name of the job as it appears on the scheduler
+%     func - function string or handle
+%     nOut - number of outputs
+%     args - cell of input arguments. '$thisworker' can be used to pass task.worker (for logging).
+%
+%   FORMAT submit() - Submits the job
+%
+%   FORMAT cance()  - Cancel the job
+%
+%   FORMAT delete() - Cancel the job and delete the job storage folder
+%
+%   FORMAT val = getOutput()
+%   Retrieve the output (if any)
+%   OUTPUT
+%     val - 1xN cell array, where N corresponds to the number of outputs
+%
+%
+% SEE ALSO
+% poolClass, batch
+
+    properties (SetAccess = private)
         id
         name
+    end
+
+    properties
         additionalPaths = {}
         tasks = {};
     end
@@ -75,7 +111,7 @@ classdef jobClass < handle
                     cmd = strrep(cmd,['$thispool.' poolVars{1}],this.pool.(poolVars{1}));
                 end
             end
-            cmd
+
             [s, w] = system(cmd);
             for t = 1:numel(this.tasks)
                 this.tasks{t}.startDateTime = datetime();
@@ -86,6 +122,7 @@ classdef jobClass < handle
         end
 
         function val = get.state(this)
+            val = 'unknown';
             if ~isnan(this.schedulerID)
                 val = this.pool.getJobStateFcn(this.schedulerID);
             end
@@ -97,7 +134,6 @@ classdef jobClass < handle
                 else, val = 'finished';
                 end
             elseif any(strcmp(taskStates,'running')), val = 'running'; % last resort
-            else, val = 'unknown';
             end
         end
 
