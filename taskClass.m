@@ -59,6 +59,7 @@ classdef taskClass < handle
             if nOut > 0, this.outFile = fullfile(this.folder,'out.mat'); end
 
             % assemble command
+            packageCommand = '';
             pathCommand = '';
             varCommand = '';
             command = func2str(func);
@@ -82,6 +83,10 @@ classdef taskClass < handle
                 outputStr = strjoin(arrayfun(@(o) sprintf('o%d',o), 1:nOut, 'UniformOutput', false),',');
                 command = sprintf('[ %s ] = %s; save(''-binary'',''%s'', ''%s'')', outputStr, command, this.outFile, strrep(outputStr,',',''','''));
             end
+            % - packages
+            for p = reshape(this.parent.additionalPackages,1,[])
+                packageCommand = sprintf('%spkg load %s;',packageCommand,p{1});
+            end
             % - path
             if ~isempty(this.parent.additionalPaths)
                 userVariable.reqpath = this.parent.additionalPaths;
@@ -92,7 +97,7 @@ classdef taskClass < handle
                 save('-binary',fullfile(this.folder,'data.mat'),'-struct','userVariable');
                 varCommand = sprintf('load(''%s'',%s);',fullfile(this.folder,'data.mat'),['''' strrep(varStr(1:end-1),',',''',''') '''']);
             end
-            command = [pathCommand, varCommand, command ';'];
+            command = [packageCommand, pathCommand, varCommand, command ';'];
 
             % create script
             fid = fopen(this.shellFile,'w');

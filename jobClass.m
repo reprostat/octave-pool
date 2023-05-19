@@ -2,11 +2,12 @@ classdef jobClass < handle
 % Class to represent a job submitted to the pool. It is usually not created by directly calling its constructor but rather via poolClass/addJob and batch.
 %
 % PROPERTIES
-%   id              - read-only, job number in the pool to determine job name.
-%   name            - read-only, job name in the pool to deternmine the job storage folder in pool.jobStorageLocation.
-%   additionalPaths - cell of paths to be added to the job (default = {})
-%   tasks           - list of tasks (usually 1)
-%   state           - job state as return by the scheduler
+%   id                 - read-only, job number in the pool to determine job name.
+%   name               - read-only, job name in the pool to deternmine the job storage folder in pool.jobStorageLocation.
+%   additionalPaths    - cell of paths to be added to the job (default = {})
+%   additionalPackages - cell of package names to be loaded before running the job, they MUST be installed (default = {})
+%   tasks              - list of tasks (usually 1)
+%   state              - job state as return by the scheduler
 %
 % METHODS
 %   FORMAT addTask(name,func,nOut,args)
@@ -39,6 +40,7 @@ classdef jobClass < handle
 
     properties
         additionalPaths = {}
+        additionalPackages = {}
         tasks = {};
     end
 

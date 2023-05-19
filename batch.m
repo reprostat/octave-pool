@@ -11,9 +11,10 @@ function j = batch(pool,func,nOut,argIn,varargin)
 %   argIn - cell of input arguments. '$thisworker' can be used to pass task.worker (for logging).
 %
 % FORMAT j = batch(...,Name,Value)
-%   'name'              - name of the job as it appears on the scheduler (default = '')
-%   'autoAddClientPath' - automatically add current Ocatave path to the job (default = false)
-%   'additionalPaths'   - cell of paths to be added to the job (default = {})
+%   'name'               - name of the job as it appears on the scheduler (default = '')
+%   'autoAddClientPath'  - automatically add current Ocatave path to the job (default = false)
+%   'additionalPaths'    - cell of paths to be added to the job (default = {})
+%   'additionalPackages' - cell of package names to be loaded before running the job, they MUST be installed (default = {})
 %
 %
 % SEE ALSO
@@ -26,6 +27,7 @@ function j = batch(pool,func,nOut,argIn,varargin)
     argParse.addParameter('name','',@ischar);
     argParse.addParameter('autoAddClientPath',false,@(x) islogical(x) | isnumeric(x));
     argParse.addParameter('additionalPaths',{},@iscellstr);
+    argParse.addParameter('additionalPackages',{},@iscellstr);
     argParse.parse(varargin{:});
 
     % Prepare job
@@ -39,6 +41,7 @@ function j = batch(pool,func,nOut,argIn,varargin)
     % Run job
     j = pool.addJob();
     if ~isempty(additionalPaths), j.additionalPaths = unique(additionalPaths,'stable'); end
+    if ~isempty(argParse.Results.additionalPackages), j.additionalPackages = unique(argParse.Results.additionalPackages,'stable'); end
     j.addTask(jobName,func,nOut,argIn);
     j.submit();
 
