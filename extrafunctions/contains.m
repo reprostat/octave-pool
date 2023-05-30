@@ -26,7 +26,7 @@ function out = contains(str,pttrn,varargin)
     end
 
     if ~argParse.Results.regularExpression
-        pttrn = ['.*' strrep(pttrn,'\','\\') '.*'];
+        pttrn = ['.*' strreps(pttrn,{'\' '.'},{'\\' '\.'}) '.*'];
     end
 
     switch class(str)
