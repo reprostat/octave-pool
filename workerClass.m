@@ -62,6 +62,7 @@ classdef workerClass < handle
             if toLog
                 varargin = [{['[%s] - ' varargin{1}]} {char(datetime())} varargin(2:end)];
                 if ~strcmp(varargin{1}(end-1:end),'\n'), varargin{1} = [varargin{1} '\n']; end
+                if ~exist(fileparts(this.logFile),'dir'), mkdir(fileparts(this.logFile)); end
                 fid = fopen(this.logFile,'a');
                 fprintf(fid, varargin{:});
                 fclose(fid);
