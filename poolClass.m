@@ -178,7 +178,7 @@ classdef poolClass < handle
         function val = getJobState(this,state)
             val = containers.Map('KeyType','char', 'ValueType','double');
             jobStates = cellfun(@(j) j.state, this.jobs, 'UniformOutput',false);
-            for s = unique(jobStates)
+            for s = jobStates
                 if ~val.isKey(s{1}), val(s{1}) = 0; end
                 val(s{1}) = val(s{1}) + 1;
             end
