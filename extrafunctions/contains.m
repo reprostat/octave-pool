@@ -17,7 +17,12 @@ function out = contains(str,pttrn,varargin)
 
     argParse = inputParser;
     argParse.addParameter('regularExpression',false,@islogical);
+    argParse.addParameter('IgnoreCase',false,@islogical);
     argParse.parse(varargin{:});
+
+    if argParse.Results.IgnoreCase, fnc = @regexpi;
+    else, fnc = @regexp;
+    end
 
     if ~ischar(pttrn) % MATLAB's advanced pattern
         warning('MATLAB''s advanced pattern is not yet implemented');
@@ -31,9 +36,9 @@ function out = contains(str,pttrn,varargin)
 
     switch class(str)
         case 'char'
-            out = ~isempty(regexp(str,pttrn, 'once'));
+            out = ~isempty(fnc(str,pttrn, 'once'));
         case 'cell'
-            out = cellfun(@(p) ~isempty(regexp(p,pttrn, 'once')), str);
+            out = cellfun(@(p) ~isempty(fnc(p,pttrn, 'once')), str);
     end
 
 end
