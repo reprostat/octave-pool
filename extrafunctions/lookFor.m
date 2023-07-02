@@ -1,8 +1,8 @@
-function out = contains(str,pttrn,varargin)
-% Implement MATLAB's contains function. It can also handle cell input (for the main string) and regular expression for the pattern.
-% CAVEAT: It does not work with MATLAB's advanced pattern (see warning)
+function out = lookFor(str,pttrn,varargin)
+% Look for substring in in the first string input, similarly to MATLAB's contains. 
+% It can also handle cell input (for the main string) and regular expression for the pattern.
 %
-% FORMAT out = contains(str,pttrn);
+% FORMAT out = lookFor(str,pttrn);
 %
 % INPUT
 %   str   - main string of cell of strings testing for pattern.
@@ -12,15 +12,15 @@ function out = contains(str,pttrn,varargin)
 %   out - 1xN logical array, where N is the number of main strings (in the cell).
 %
 %
-% FORMAT out = contains(str,pttrn,'regularExpression',true);
+% FORMAT out = lookFor(str,pttrn,'regularExpression',true);
 % Input pttrn is a regular expression.
 
     argParse = inputParser;
     argParse.addParameter('regularExpression',false,@islogical);
-    argParse.addParameter('IgnoreCase',false,@islogical);
+    argParse.addParameter('ignoreCase',false,@islogical);
     argParse.parse(varargin{:});
 
-    if argParse.Results.IgnoreCase, fnc = @regexpi;
+    if argParse.Results.ignoreCase, fnc = @regexpi;
     else, fnc = @regexp;
     end
 

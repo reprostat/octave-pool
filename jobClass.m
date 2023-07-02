@@ -108,7 +108,7 @@ classdef jobClass < handle
             cmd = this.pool.getSubmitStringFcn(this);
 
             % - parse special cases
-            if contains(cmd,'\$thispool','regularExpression',true)
+            if lookFor(cmd,'\$thispool','regularExpression',true)
                 for poolVars = regexp(cmd,'(?<=\$thispool\.)[^ ]*','match')
                     cmd = strrep(cmd,['$thispool.' poolVars{1}],this.pool.(poolVars{1}));
                 end
