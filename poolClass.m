@@ -7,8 +7,8 @@ classdef poolClass < handle
 %
 % PROPERTIES
 %   name                 - pool name,
-%   type                 - scheduler ('powershell', 'Slurm', 'Torque', 'LSF', 'Generic')
-%   shell                - shell for the shceuler commands ('windows', 'bash'), used in taskClass/taskClass
+%   type                 - scheduler ('local', 'Slurm', 'Torque', 'LSF', 'Generic')
+%   shell                - shell for the scheduler commands ('powershell', 'bash'), used in taskClass/taskClass
 %   numWorkers           - maximum number of active workers
 %   jobStorageLocation   - folder to store submission files (shell and Octave scripts, input, output, log files)
 %   resourceTemplate     - submission parameters describing resource requirements
@@ -123,7 +123,7 @@ classdef poolClass < handle
                 case {'Slurm'}
                     datWT = str2double(regexp(this.resourceTemplate,'(?<=--time=)[0-9]*','match','once'))/60;
                     datMem = str2double(regexp(this.resourceTemplate,'(?<=--mem=)[0-9]*','match','once'));
-                case {'local' 'powershell'}
+                case {'local'}
                     datWT = NaN;
                     datMem = NaN;
             end
@@ -229,7 +229,7 @@ end
 %!    ];
 %! addpath(pathToAdd)
 %! if ispc(), pool = poolClass('local_PS');
-%! else, pool = poolClass('slurm');
+%! else, pool = poolClass('local_sh');
 %! end
 %! pool.jobStorageLocation = fullfile(fileparts(mfilename('fullpath')),'test');
 %! j = pool.addJob();
@@ -251,7 +251,7 @@ end
 %!    ];
 %! addpath(pathToAdd)
 %! if ispc(), pool = poolClass('local_PS');
-%! else, pool = poolClass('slurm');
+%! else, pool = poolClass('local_sh');
 %! end
 %! pool.jobStorageLocation = fullfile(fileparts(mfilename('fullpath')),'test');
 %! inp = rand(1000);

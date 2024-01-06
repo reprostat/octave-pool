@@ -1,10 +1,10 @@
 name: octave-pool
-version: 1.1.6
-date: 2023-07-05
+version: 1.2.0
+date: 2024-01-06
 author: Tibor Auer <tibor.auer@gmail.com>
 maintainer: Tibor Auer <tibor.auer@gmail.com>
 title: Parallel computing
 description: The package implements parallel computing using independent job submission functionality. This version works on both Windows (local workstation)
- and Linux (SLURM).
+ and Linux (local workstation and SLURM).
 categories: package
 depends: octave (>= 7.2.0), fileio

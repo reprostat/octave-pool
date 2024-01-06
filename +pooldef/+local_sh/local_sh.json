@@ -1,0 +1,17 @@
+{
+    "name": "local_sh",
+    "type": "local",
+    "shell": "bash",
+    "numWorkers": "4",
+
+    "jobStorageLocation": "",
+    "resourceTemplate": "",
+    "submitArguments": "",
+    "initialConfiguration": "",
+    "octaveExecutable": "octave-cli",
+
+    "functions": {
+        "submitStringFcn": "@(job) sprintf( '%s', fileread(job.tasks{1}.shellFile))",
+        "schedulerIDFcn": "pooldef.local_sh.jobID"
+    }
+}

@@ -1,7 +1,7 @@
 {
     "name": "local_PS",
-    "type": "powershell",
-    "shell": "windows",
+    "type": "local",
+    "shell": "powershell",
     "numWorkers": "4",
 
     "jobStorageLocation": "",

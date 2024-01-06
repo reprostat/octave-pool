@@ -114,7 +114,12 @@ classdef jobClass < handle
                 end
             end
 
-            [s, w] = system(cmd);
+            if strcmp(this.pool.type,'local') && strcmp(this.pool.shell,'bash')
+              w = system(cmd,false,'async');
+              s = 0;
+            else
+              [s, w] = system(cmd);
+            end
             for t = 1:numel(this.tasks)
                 this.tasks{t}.startDateTime = datetime();
             end
