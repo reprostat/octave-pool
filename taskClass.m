@@ -93,9 +93,11 @@ classdef taskClass < handle
                 pathCommand = sprintf('load(''%s'',''reqpath'');addpath(reqpath{:});',fullfile(this.folder,'data.mat'));
             end
             % - input
+            if exist(varStr,'var')
+                varCommand = sprintf('load(''%s'',%s);',fullfile(this.folder,'data.mat'),['''' strrep(varStr(1:end-1),',',''',''') '''']);
+            end
             if ~isempty(userVariable)
                 save('-binary',fullfile(this.folder,'data.mat'),'-struct','userVariable');
-                varCommand = sprintf('load(''%s'',%s);',fullfile(this.folder,'data.mat'),['''' strrep(varStr(1:end-1),',',''',''') '''']);
             end
             command = [packageCommand, pathCommand, varCommand, command ';'];
 
