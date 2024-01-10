@@ -8,7 +8,7 @@
     "resourceTemplate": "",
     "submitArguments": "",
     "initialConfiguration": "",
-    "octaveExecutable": "octave-cli",
+    "octaveExecutable": "octave",
 
     "functions": {
         "submitStringFcn": "@(job) sprintf( '%s', fileread(job.tasks{1}.shellFile))",
