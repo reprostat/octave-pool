@@ -1,6 +1,6 @@
 name: octave-pool
-version: 1.2.2
-date: 2024-01-10
+version: 1.2.3
+date: 2024-03-04
 author: Tibor Auer <tibor.auer@gmail.com>
 maintainer: Tibor Auer <tibor.auer@gmail.com>
 title: Parallel computing
