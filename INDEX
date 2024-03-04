@@ -8,5 +8,5 @@ SECONDARY
  taskClass
  workerClass
 HELPER
- contains
+ lookFor
  datetime
