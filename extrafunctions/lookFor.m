@@ -1,5 +1,5 @@
 function out = lookFor(str,pttrn,varargin)
-% Look for substring in in the first string input, similarly to MATLAB's contains. 
+% Look for substring in in the first string input, similarly to MATLAB's contains.
 % It can also handle cell input (for the main string) and regular expression for the pattern.
 %
 % FORMAT out = lookFor(str,pttrn);
@@ -31,7 +31,8 @@ function out = lookFor(str,pttrn,varargin)
     end
 
     if ~argParse.Results.regularExpression
-        pttrn = ['.*' strreps(pttrn,{'\' '.'},{'\\' '\.'}) '.*'];
+        escCh = {'\' '.' '(' ')'};
+        pttrn = ['.*' strreps(pttrn,escCh,cellfun(@(ch) ['\' ch], escCh, 'UniformOutput',false)) '.*'];
     end
 
     switch class(str)
